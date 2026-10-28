@@ -20,7 +20,7 @@
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     html, body {
       margin: 0; padding: 0; width: 100%; height: 100%;
-      overflow: hidden; touch-action: none;
+      overflow: hidden;
       font-family: system-ui, -apple-system, sans-serif;
       background-color: #f8fafc;
     }
@@ -31,44 +31,48 @@
         linear-gradient(to bottom, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
       background-color: #f8fafc;
     }
-    .grid-lines {
-      background-size: 100% 32px;
-      background-image: linear-gradient(to bottom, rgba(71, 85, 105, 0.15) 1px, transparent 1px);
-      background-color: #fffdfa;
+    #drawingCanvas { 
+      touch-action: none; 
+      cursor: crosshair; 
+      width: 100%; 
+      height: 100%; 
+      display: block; 
     }
-    .grid-blank { background-color: #ffffff; }
-    #drawingCanvas { touch-action: none; cursor: crosshair; }
+    #sidebar, #sidebar button, .modal-interactive, .modal-interactive button {
+      touch-action: auto !important;
+      pointer-events: auto !important;
+    }
   </style>
 </head>
-<body class="flex h-screen w-screen overflow-hidden select-none bg-slate-900 text-slate-800">
+<body class="flex h-screen w-screen overflow-hidden select-none bg-slate-100 text-slate-800">
 
   <!-- משטח הכתיבה הראשי -->
   <main class="relative flex-1 h-full overflow-hidden grid-math" id="canvasContainer">
-    <canvas id="drawingCanvas" class="w-full h-full block"></canvas>
+    <canvas id="drawingCanvas"></canvas>
     
-    <!-- חיווי סטטוס עט/כף יד צף -->
-    <div id="palmFloatingBadge" class="absolute top-4 left-4 z-20 bg-white/90 backdrop-blur px-3 py-1.5 rounded-2xl shadow-md border border-slate-200 flex items-center gap-2 pointer-events-none text-xs font-semibold text-emerald-700">
+    <!-- חיווי סטטוס עט/כף יד -->
+    <div id="palmFloatingBadge" class="absolute top-4 left-4 z-20 bg-white/95 backdrop-blur px-3.5 py-1.5 rounded-2xl shadow border border-slate-200 flex items-center gap-2 pointer-events-none text-xs font-semibold text-emerald-700">
       <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-      <span id="badgeStatusText">עט בלבד פעיל (כף יד נדחית)</span>
+      <span id="badgeStatusText">עט בלבד פעיל (דחיית כף יד)</span>
     </div>
 
-    <!-- כפתור מסך מלא מהיר -->
-    <button id="btnFullscreen" class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-slate-700 hover:text-slate-900 w-10 h-10 rounded-2xl shadow-md border border-slate-200 flex items-center justify-center text-sm active:scale-95 transition-transform" title="מסך מלא">
+    <!-- כפתור מסך מלא -->
+    <button id="btnFullscreen" class="absolute top-4 right-4 z-20 bg-white/90 backdrop-blur text-slate-700 hover:text-slate-900 w-10 h-10 rounded-2xl shadow border border-slate-200 flex items-center justify-center text-sm active:scale-95 transition-transform" title="מסך מלא">
       <i class="fa-solid fa-expand"></i>
     </button>
   </main>
 
   <!-- סרגל כלים צידי אנכי קבוע מימין -->
-  <aside id="sidebar" class="w-20 md:w-24 bg-white border-r border-slate-200 h-full flex flex-col justify-between items-center py-4 px-2 shadow-2xl z-40">
+  <aside id="sidebar" class="w-20 md:w-24 bg-white border-r border-slate-200 h-full flex flex-col justify-between items-center py-3 px-2 shadow-xl z-40 relative">
     
-    <!-- חלק עליון: לוגו ומצבי עט/מחק -->
-    <div class="flex flex-col items-center gap-3 w-full">
-      <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-md shadow-indigo-600/30">
+    <!-- חלק עליון: לוגו, עט, מחק, עובי וצבעים -->
+    <div class="flex flex-col items-center gap-2.5 w-full">
+      <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-md shadow-indigo-600/30">
         ∑
       </div>
 
       <!-- כלי עט ומחק -->
-      <div class="flex flex-col gap-2 w-full pt-1">
+      <div class="flex flex-col gap-1.5 w-full pt-1">
         <button id="btnPen" class="w-full py-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold border-2 border-indigo-600 flex flex-col items-center justify-center gap-1 text-xs transition-all shadow-sm">
           <i class="fa-solid fa-pen text-base"></i>
           <span>עט</span>
@@ -79,27 +83,24 @@
         </button>
       </div>
 
-      <!-- בורר עובי קו (דק מאוד, בינוני, עבה) -->
-      <div class="w-full bg-slate-100 rounded-xl p-1.5 flex flex-col items-center gap-2 border border-slate-200">
+      <!-- בורר עובי קו -->
+      <div class="w-full bg-slate-100 rounded-xl p-1.5 flex flex-col items-center gap-1 border border-slate-200">
         <span class="text-[10px] text-slate-500 font-bold">עובי</span>
-        <div class="flex items-center justify-center gap-2 w-full">
-          <!-- דק במיוחד 1.5px -->
-          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center bg-white shadow-sm border-2 border-indigo-600" data-width="1.5" title="דק במיוחד (1.5px)">
+        <div class="flex items-center justify-around w-full">
+          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center bg-white shadow-sm border-2 border-indigo-600" data-width="1.5" title="דק (1.5px)">
             <span class="w-1.5 h-1.5 rounded-full bg-slate-800"></span>
           </button>
-          <!-- בינוני 3px -->
-          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center bg-transparent hover:bg-white" data-width="3" title="בינוני (3px)">
+          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-white" data-width="3.5" title="בינוני (3.5px)">
             <span class="w-2.5 h-2.5 rounded-full bg-slate-800"></span>
           </button>
-          <!-- עבה 5px -->
-          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center bg-transparent hover:bg-white" data-width="5" title="עבה (5px)">
+          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center hover:bg-white" data-width="6" title="עבה (6px)">
             <span class="w-3.5 h-3.5 rounded-full bg-slate-800"></span>
           </button>
         </div>
       </div>
 
       <!-- צבעים -->
-      <div class="grid grid-cols-2 gap-2 pt-1">
+      <div class="grid grid-cols-2 gap-1.5 pt-1">
         <button class="color-dot w-7 h-7 rounded-full bg-slate-900 ring-2 ring-offset-2 ring-indigo-600 shadow-sm" data-color="#0f172a"></button>
         <button class="color-dot w-7 h-7 rounded-full bg-blue-600 shadow-sm" data-color="#2563eb"></button>
         <button class="color-dot w-7 h-7 rounded-full bg-emerald-600 shadow-sm" data-color="#059669"></button>
@@ -107,54 +108,58 @@
       </div>
 
       <!-- מתג דחיית כף יד -->
-      <button id="togglePalm" class="w-full py-2 px-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 flex flex-col items-center gap-1 text-[11px] font-bold mt-1" title="החלף מצב דחיית כף יד">
-        <i class="fa-solid fa-hand text-sm"></i>
+      <button id="togglePalm" class="w-full py-2 px-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 flex flex-col items-center gap-0.5 text-[11px] font-bold mt-0.5" title="החלף מצב דחיית כף יד">
+        <i class="fa-solid fa-hand text-xs"></i>
         <span id="btnPalmText">עט בלבד</span>
       </button>
 
-      <!-- עזרים: ביטול וניקוי -->
-      <div class="flex items-center gap-2 pt-1">
-        <button id="btnUndo" class="p-2.5 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl" title="בטל פעולה (Undo)">
+      <!-- ביטול וניקוי -->
+      <div class="flex items-center gap-1 pt-1">
+        <button id="btnUndo" class="p-2 text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl" title="בטל פעולה">
           <i class="fa-solid fa-rotate-left"></i>
         </button>
-        <button id="btnClear" class="p-2.5 text-rose-500 hover:bg-rose-50 rounded-xl" title="נקה את כל הלוח">
+        <button id="btnClear" class="p-2 text-rose-500 hover:bg-rose-50 rounded-xl" title="נקה לוח">
           <i class="fa-solid fa-trash-can"></i>
         </button>
       </div>
     </div>
 
-    <!-- חלק תחתון: כפתורי פעולה בולטים במיוחד -->
-    <div class="flex flex-col items-center gap-2.5 w-full pt-2 border-t border-slate-200">
+    <!-- חלק תחתון: PDF, בדיקת ביניים, פתרון מלא, והגדרות API -->
+    <div class="flex flex-col items-center gap-2 w-full pt-2 border-t border-slate-200">
       
+      <!-- הגדרות מפתח Gemini API -->
+      <button id="btnApiKey" class="text-[11px] text-slate-400 hover:text-indigo-600 flex items-center gap-1 mb-1 font-medium" title="הגדר מפתח Gemini API לבדיקה">
+        <i class="fa-solid fa-key"></i> מפתח
+      </button>
+
       <!-- כפתור PDF אדום בולט -->
-      <button id="btnExportPdf" class="w-full py-3 rounded-2xl bg-gradient-to-b from-rose-600 to-red-600 text-white font-black text-xs shadow-lg shadow-rose-600/30 flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform" title="שמור ושתף ב-PDF">
-        <i class="fa-solid fa-file-pdf text-xl"></i>
+      <button id="btnExportPdf" class="w-full py-2.5 rounded-2xl bg-gradient-to-b from-rose-600 to-red-600 text-white font-black text-xs shadow-md shadow-rose-600/30 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" title="שמור ושתף ב-PDF">
+        <i class="fa-solid fa-file-pdf text-lg"></i>
         <span>PDF</span>
       </button>
 
       <!-- בדיקת ביניים -->
-      <button id="btnCheckSteps" class="w-full py-3 rounded-2xl bg-gradient-to-b from-amber-500 to-amber-600 text-white font-extrabold text-xs shadow-lg shadow-amber-500/30 flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform" title="איך הפתרון עד פה?">
-        <i class="fa-solid fa-magnifying-glass-chart text-lg"></i>
+      <button id="btnCheckSteps" class="w-full py-2.5 rounded-2xl bg-gradient-to-b from-amber-500 to-amber-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/30 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" title="איך הפתרון עד פה?">
+        <i class="fa-solid fa-magnifying-glass-chart text-base"></i>
         <span>איך עד פה?</span>
       </button>
 
       <!-- פתרון מלא -->
-      <button id="btnCheckFull" class="w-full py-3 rounded-2xl bg-gradient-to-b from-indigo-600 to-indigo-700 text-white font-black text-xs shadow-lg shadow-indigo-600/30 flex flex-col items-center justify-center gap-1 active:scale-95 transition-transform" title="פתרון ובדיקה מלאה">
-        <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+      <button id="btnCheckFull" class="w-full py-2.5 rounded-2xl bg-gradient-to-b from-indigo-600 to-indigo-700 text-white font-black text-xs shadow-md shadow-indigo-600/30 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform" title="פתרון ובדיקה מלאה">
+        <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
         <span>פתרון מלא</span>
       </button>
-
     </div>
   </aside>
 
   <!-- חלון יצוא ושיתוף PDF -->
-  <div id="pdfModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+  <div id="pdfModal" class="modal-interactive fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4">
       <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl mx-auto flex items-center justify-center text-3xl">
         <i class="fa-solid fa-file-pdf"></i>
       </div>
       <h3 class="text-xl font-bold text-slate-800">יצוא תרגיל ל-PDF</h3>
-      <p class="text-sm text-slate-600 leading-relaxed">המערכת מייצאת את התרגיל שכתבת כמסמך PDF נקי ומוכן לשיתוף או הדפסה.</p>
+      <p class="text-sm text-slate-600 leading-relaxed">המערכת מייצאת את התרגיל שכתבת כמסמך PDF נקי.</p>
       
       <button id="btnConfirmPdf" class="w-full py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-md flex items-center justify-center gap-2">
         <i class="fa-solid fa-download"></i>
@@ -165,202 +170,20 @@
     </div>
   </div>
 
-  <script>
-    // הגדרות קנבס
-    const canvas = document.getElementById('drawingCanvas');
-    const ctx = canvas.getContext('2d');
-    const container = document.getElementById('canvasContainer');
+  <!-- חלון הזנת מפתח Gemini API -->
+  <div id="apiModal" class="modal-interactive fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 text-right">
+      <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <i class="fa-solid fa-key text-indigo-600"></i>
+        <span>הגדרת Gemini API לבדיקת תרגילים</span>
+      </h3>
+      <p class="text-xs text-slate-600 leading-relaxed">כדי שהאפליקציה תוכל לבדוק תרגילים בכתב יד, הזן מפתח חינמי מ-Google AI Studio (נשמר בטאבלט שלך בלבד):</p>
+      <input type="password" id="inputApiKey" placeholder="הדבק כאן את מפתח ה-API (AIzaSy...)" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm font-mono text-left focus:outline-none focus:ring-2 focus:ring-indigo-500">
+      <div class="flex gap-2">
+        <button id="btnSaveApiKey" class="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold">שמור מפתח</button>
+        <button id="btnCloseApiModal" class="px-4 py-2.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold">סגור</button>
+      </div>
+    </div>
+  </div>
 
-    let isDrawing = false;
-    let penModeOnly = true;
-    let tool = 'pen';
-    let strokeColor = '#0f172a';
-    let strokeWidth = 1.5;
-    let strokes = [];
-    let currentStroke = [];
-
-    function resizeCanvas() {
-      const rect = container.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-      redraw();
-    }
-    window.addEventListener('resize', resizeCanvas);
-    window.addEventListener('load', resizeCanvas);
-    setTimeout(resizeCanvas, 50);
-
-    // סינון כף יד (Palm Rejection)
-    function isPen(e) {
-      if (!penModeOnly) return true;
-      return e.pointerType === 'pen' || e.pointerType === 'mouse';
-    }
-
-    canvas.addEventListener('pointerdown', (e) => {
-      if (!isPen(e)) return;
-      isDrawing = true;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const pressure = (e.pressure && e.pressure > 0) ? e.pressure : 0.5;
-      currentStroke = [{ x, y, tool, color: strokeColor, width: strokeWidth, pressure }];
-    });
-
-    canvas.addEventListener('pointermove', (e) => {
-      if (!isDrawing || !isPen(e)) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const pressure = (e.pressure && e.pressure > 0) ? e.pressure : 0.5;
-      currentStroke.push({ x, y, tool, color: strokeColor, width: strokeWidth, pressure });
-
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
-      if (tool === 'eraser') {
-        ctx.globalCompositeOperation = 'destination-out';
-        ctx.lineWidth = 26;
-      } else {
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.strokeStyle = strokeColor;
-        ctx.lineWidth = strokeWidth * (0.6 + pressure * 0.8);
-      }
-      const prev = currentStroke[currentStroke.length - 2];
-      ctx.beginPath();
-      ctx.moveTo(prev.x, prev.y);
-      ctx.lineTo(x, y);
-      ctx.stroke();
-    });
-
-    canvas.addEventListener('pointerup', () => {
-      if (isDrawing && currentStroke.length > 0) {
-        strokes.push([...currentStroke]);
-      }
-      isDrawing = false;
-    });
-
-    function redraw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      strokes.forEach(stroke => {
-        if (!stroke.length) return;
-        ctx.beginPath();
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        if (stroke[0].tool === 'eraser') {
-          ctx.globalCompositeOperation = 'destination-out';
-          ctx.lineWidth = 26;
-        } else {
-          ctx.globalCompositeOperation = 'source-over';
-          ctx.strokeStyle = stroke[0].color;
-        }
-        ctx.moveTo(stroke[0].x, stroke[0].y);
-        for (let i = 1; i < stroke.length; i++) {
-          const p = stroke[i];
-          if (stroke[0].tool !== 'eraser') {
-            ctx.lineWidth = (stroke[0].width || 1.5) * (0.6 + (p.pressure || 0.5) * 0.8);
-          }
-          ctx.lineTo(p.x, p.y);
-        }
-        ctx.stroke();
-      });
-    }
-
-    // בורר עובי
-    document.querySelectorAll('.width-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        strokeWidth = parseFloat(btn.getAttribute('data-width'));
-        document.querySelectorAll('.width-btn').forEach(b => b.classList.remove('border-2', 'border-indigo-600', 'bg-white', 'shadow-sm'));
-        btn.classList.add('border-2', 'border-indigo-600', 'bg-white', 'shadow-sm');
-        btnPen.click();
-      });
-    });
-
-    // בורר צבעים
-    document.querySelectorAll('.color-dot').forEach(dot => {
-      dot.addEventListener('click', () => {
-        strokeColor = dot.getAttribute('data-color');
-        tool = 'pen';
-        document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('ring-2', 'ring-offset-2', 'ring-indigo-600'));
-        dot.classList.add('ring-2', 'ring-offset-2', 'ring-indigo-600');
-        btnPen.click();
-      });
-    });
-
-    // עט ומחק
-    const btnPen = document.getElementById('btnPen');
-    const btnEraser = document.getElementById('btnEraser');
-    btnPen.addEventListener('click', () => {
-      tool = 'pen';
-      btnPen.className = 'w-full py-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold border-2 border-indigo-600 flex flex-col items-center justify-center gap-1 text-xs transition-all shadow-sm';
-      btnEraser.className = 'w-full py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-medium flex flex-col items-center justify-center gap-1 text-xs transition-all';
-    });
-    btnEraser.addEventListener('click', () => {
-      tool = 'eraser';
-      btnEraser.className = 'w-full py-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold border-2 border-indigo-600 flex flex-col items-center justify-center gap-1 text-xs transition-all shadow-sm';
-      btnPen.className = 'w-full py-2.5 rounded-xl text-slate-600 hover:bg-slate-100 font-medium flex flex-col items-center justify-center gap-1 text-xs transition-all';
-    });
-
-    // נקה ובטל
-    document.getElementById('btnClear').addEventListener('click', () => {
-      strokes = [];
-      redraw();
-    });
-    document.getElementById('btnUndo').addEventListener('click', () => {
-      if (strokes.length) {
-        strokes.pop();
-        redraw();
-      }
-    });
-
-    // מעבר מצב כף יד
-    const togglePalm = document.getElementById('togglePalm');
-    const btnPalmText = document.getElementById('btnPalmText');
-    const badgeStatusText = document.getElementById('badgeStatusText');
-    togglePalm.addEventListener('click', () => {
-      penModeOnly = !penModeOnly;
-      if (penModeOnly) {
-        btnPalmText.textContent = 'עט בלבד';
-        togglePalm.className = 'w-full py-2 px-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 flex flex-col items-center gap-1 text-[11px] font-bold mt-1';
-        badgeStatusText.textContent = 'עט בלבד פעיל (כף יד נדחית)';
-      } else {
-        btnPalmText.textContent = 'עט + אצבע';
-        togglePalm.className = 'w-full py-2 px-1 rounded-xl bg-amber-50 text-amber-700 border border-amber-300 flex flex-col items-center gap-1 text-[11px] font-bold mt-1';
-        badgeStatusText.textContent = 'מגע אצבע פעיל (כף יד לא נדחית)';
-      }
-    });
-
-    // מסך מלא
-    document.getElementById('btnFullscreen').addEventListener('click', () => {
-      if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    });
-
-    // ייצוא ושיתוף PDF
-    const pdfModal = document.getElementById('pdfModal');
-    document.getElementById('btnExportPdf').addEventListener('click', () => {
-      pdfModal.classList.remove('hidden');
-    });
-    document.getElementById('btnClosePdf').addEventListener('click', () => {
-      pdfModal.classList.add('hidden');
-    });
-
-    document.getElementById('btnConfirmPdf').addEventListener('click', () => {
-      pdfModal.classList.add('hidden');
-      if (!strokes.length) {
-        alert('הלוח ריק! כתוב תרגיל כדי לייצא.');
-        return;
-      }
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm' });
-      const imgData = canvas.toDataURL('image/png');
-      pdf.setFontSize(14);
-      pdf.text('תרגיל מתמטיקה', 15, 15);
-      pdf.addImage(imgData, 'PNG', 15, 20, 260, 150);
-      pdf.save('math-exercise.pdf');
-    });
-  </script>
-</body>
-</html>
+  <!-- חלונית הצגת תוצאות הבדיקה (Ka
