@@ -16,26 +16,16 @@
 
   <style>
     * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
-    html, body {
-      margin: 0; padding: 0; width: 100%; height: 100%;
-      overflow: hidden; touch-action: none;
-      font-family: system-ui, -apple-system, sans-serif;
-      background-color: #f8fafc;
-    }
-    .grid-math {
-      background-size: 28px 28px;
-      background-image: 
-        linear-gradient(to right, rgba(99, 102, 241, 0.12) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
-      background-color: #f8fafc;
-    }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; touch-action: none; font-family: system-ui, -apple-system, sans-serif; background-color: #f8fafc; }
+    .grid-math { background-size: 28px 28px; background-image: linear-gradient(to right, rgba(99, 102, 241, 0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(99, 102, 241, 0.12) 1px, transparent 1px); background-color: #f8fafc; }
     #drawingCanvas { touch-action: none; cursor: crosshair; }
     .solution-content { font-size: 1.1rem; line-height: 1.6; white-space: pre-wrap; }
-    .solution-content p { margin-bottom: 0.5rem; }
+    #sidebar::-webkit-scrollbar { width: 0px; }
   </style>
 </head>
 <body class="flex h-screen w-screen overflow-hidden select-none bg-slate-900 text-slate-800">
 
+  <!-- משטח הכתיבה הראשי -->
   <main class="relative flex-1 h-full overflow-hidden grid-math" id="canvasContainer">
     <canvas id="drawingCanvas" class="w-full h-full block"></canvas>
     
@@ -45,10 +35,13 @@
     </div>
   </main>
 
+  <!-- סרגל כלים צידי אנכי -->
   <aside id="sidebar" class="w-20 md:w-24 bg-white border-r border-slate-200 h-full flex flex-col justify-between items-center py-4 px-2 shadow-2xl z-40 overflow-y-auto">
+    
     <div class="flex flex-col items-center gap-3 w-full">
-      <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-md">∑</div>
+      <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-black text-xl shadow-md shrink-0">∑</div>
 
+      <!-- כלי עט ומחק -->
       <div class="flex flex-col gap-2 w-full pt-1">
         <button id="btnPen" class="w-full py-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-bold border-2 border-indigo-600 flex flex-col items-center gap-1 text-xs shadow-sm">
           <i class="fa-solid fa-pen text-base"></i><span>עט</span>
@@ -58,21 +51,48 @@
         </button>
       </div>
 
+      <!-- בורר עובי קו -->
+      <div class="w-full bg-slate-100 rounded-xl p-1.5 flex flex-col items-center gap-2 border border-slate-200">
+        <span class="text-[10px] text-slate-500 font-bold">עובי</span>
+        <div class="flex items-center justify-center gap-2 w-full">
+          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center bg-white shadow-sm border-2 border-indigo-600" data-width="1.5" title="דק במיוחד"><span class="w-1.5 h-1.5 rounded-full bg-slate-800"></span></button>
+          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center bg-transparent hover:bg-white" data-width="3" title="בינוני"><span class="w-2.5 h-2.5 rounded-full bg-slate-800"></span></button>
+          <button class="width-btn w-6 h-6 rounded-full flex items-center justify-center bg-transparent hover:bg-white" data-width="5" title="עבה"><span class="w-3.5 h-3.5 rounded-full bg-slate-800"></span></button>
+        </div>
+      </div>
+
+      <!-- צבעים -->
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button class="color-dot w-7 h-7 rounded-full bg-slate-900 ring-2 ring-offset-2 ring-indigo-600 shadow-sm" data-color="#0f172a"></button>
+        <button class="color-dot w-7 h-7 rounded-full bg-blue-600 shadow-sm" data-color="#2563eb"></button>
+        <button class="color-dot w-7 h-7 rounded-full bg-emerald-600 shadow-sm" data-color="#059669"></button>
+        <button class="color-dot w-7 h-7 rounded-full bg-rose-600 shadow-sm" data-color="#e11d48"></button>
+      </div>
+
+      <!-- הגדרות מפתח API -->
       <button id="btnSettings" class="w-full py-2 mt-1 rounded-xl bg-slate-100 text-slate-600 hover:bg-slate-200 flex flex-col items-center gap-1 text-[10px] font-bold border border-slate-300">
         <i class="fa-solid fa-gear text-sm"></i>
         <span>חיבור AI</span>
       </button>
 
+      <!-- מתג כף יד -->
       <button id="togglePalm" class="w-full py-2 px-1 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-300 flex flex-col items-center gap-1 text-[11px] font-bold mt-1">
         <i class="fa-solid fa-hand text-sm"></i>
         <span id="btnPalmText">עט בלבד</span>
       </button>
 
+      <!-- עזרים -->
       <div class="flex items-center gap-2 pt-1 w-full justify-center">
         <button id="btnUndo" class="p-2 text-slate-600 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-rotate-left"></i></button>
         <button id="btnClear" class="p-2 text-rose-500 hover:bg-rose-50 rounded-xl"><i class="fa-solid fa-trash-can"></i></button>
       </div>
     </div>
 
-    <div class="flex flex-col items-center gap-2.5 w-full pt-2 border-t border-slate-200">
-      <button id="btnCheckSteps" class
+    <!-- חלק תחתון: כפתורי פעולה -->
+    <div class="flex flex-col items-center gap-2.5 w-full pt-2 mt-2 border-t border-slate-200 shrink-0">
+      
+      <button id="btnExportPdf" class="w-full py-2.5 rounded-xl bg-gradient-to-b from-rose-600 to-red-600 text-white font-bold text-[10px] shadow-lg flex flex-col items-center justify-center gap-1 active:scale-95">
+        <i class="fa-solid fa-file-pdf text-base"></i><span>ל-PDF</span>
+      </button>
+
+      <button id="btnCheckSteps" class="w-full py-2.5 rounded-xl bg-gradient-to-b from-amber-500 to-amber-600 text-white
